@@ -4,21 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartApply | AI Resume Analyzer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- External Libraries and Styles -->
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind CSS Framework -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> <!-- Google Font -->
     <style>
+        /* Custom global styles */
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        /* Styles for the animated progress circle */
         .progress-ring__circle { transition: stroke-dashoffset 0.5s ease-in-out; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        /* Style for the modal background overlay */
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <!-- HEADER -->
+    <!-- HEADER SECTION -->
     <header class="bg-white shadow-sm">
         <nav class="container mx-auto px-4 lg:px-6 py-4 flex justify-between items-center">
+            <!-- Logo and App Name -->
             <div class="flex items-center space-x-2">
                 <svg class="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
                 <span class="text-xl font-bold text-gray-900">SmartApply</span>
@@ -26,10 +31,10 @@
         </nav>
     </header>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN CONTENT AREA -->
     <main class="container mx-auto px-4 lg:px-6 py-8 md:py-12">
         
-        <!-- FORM SECTION -->
+        <!-- FORM SECTION FOR UPLOADING RESUME AND JOB DESCRIPTION -->
         <div class="max-w-4xl mx-auto">
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
                 <div class="text-center mb-6">
@@ -37,6 +42,7 @@
                     <p class="text-gray-600 mt-2">Get AI-powered feedback on your resume in seconds.</p>
                 </div>
                 
+                <!-- The main form that submits data to the Flask backend -->
                 <form method="POST" enctype="multipart/form-data">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -60,11 +66,14 @@
         </div>
 
         <!-- RESULTS SECTION -->
+        <!-- This entire section is only rendered if the `results` object exists -->
         {% if results %}
         <div id="results-section" class="max-w-4xl mx-auto mt-12">
             <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
                 <h2 class="text-2xl font-bold text-center mb-6">Analysis Report for <span class="text-indigo-600">{{ results.job_title }}</span></h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    
+                    <!-- Match Score Gauge -->
                     <div class="flex flex-col items-center justify-center">
                          <div class="relative w-40 h-40">
                             <svg class="w-full h-full" viewBox="0 0 100 100">
@@ -77,25 +86,32 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Key Stats Cards -->
                     <div class="md:col-span-2 grid grid-cols-2 gap-4 text-center">
                         <div class="bg-green-50 p-4 rounded-lg"><p class="text-2xl font-bold text-green-600">{{ results.matched_skills|length }}</p><p class="text-sm font-medium text-gray-600">Matched Skills</p></div>
                         <div class="bg-red-50 p-4 rounded-lg"><p class="text-2xl font-bold text-red-600">{{ results.missing_skills|length }}</p><p class="text-sm font-medium text-gray-600">Missing Skills</p></div>
                     </div>
                 </div>
                 <hr class="my-6 md:my-8">
+                
+                <!-- Skill Details -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Matched Skills List -->
                     <div>
                         <h3 class="font-bold text-lg mb-3 text-green-700">✅ Skills Found on Your Resume</h3>
                         <div class="flex flex-wrap gap-2">
                             {% for skill in results.matched_skills %}<span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">{{ skill|title }}</span>{% else %}<p class="text-gray-500 text-sm">No matching skills found.</p>{% endfor %}
                         </div>
                     </div>
+                     <!-- Missing Skills List with AI Buttons -->
                      <div>
                         <h3 class="font-bold text-lg mb-3 text-red-700">💡 Recommended Skills to Add</h3>
                         <div class="flex flex-wrap gap-3">
                            {% for skill in results.missing_skills %}
                                 <div class="flex items-center bg-red-100 text-red-800 text-sm font-medium pl-3 pr-2 py-1 rounded-full">
                                     <span>{{ skill|title }}</span>
+                                    <!-- The "Get Suggestion" button -->
                                     <button class="ml-2 text-red-500 hover:text-red-700 get-suggestion-btn" data-skill="{{ skill }}" data-job-title="{{ results.job_title }}" aria-label="Get AI suggestion for {{ skill }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
                                     </button>
@@ -111,7 +127,7 @@
         {% endif %}
     </main>
 
-    <!-- AI Suggestion Modal -->
+    <!-- AI SUGGESTION MODAL (Initially hidden) -->
     <div id="ai-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden" role="dialog" aria-modal="true">
         <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full">
             <div class="p-6">
@@ -130,9 +146,12 @@
         </div>
     </div>
 
-    <!-- JavaScript for interactivity -->
+    <!-- JAVASCRIPT FOR PAGE INTERACTIVITY -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // This event fires when the initial HTML document has been completely loaded and parsed.
+
+            // --- Animated Progress Circle Logic ---
             const circle = document.getElementById('progress-circle');
             if (circle) {
                 const score = parseInt(document.getElementById('progress-text').textContent, 10);
@@ -144,6 +163,7 @@
                 setTimeout(() => { circle.style.strokeDashoffset = offset; }, 100);
             }
 
+            // --- AI Suggestion Modal Logic ---
             const modal = document.getElementById('ai-modal');
             const closeModalBtn = document.getElementById('close-modal-btn');
             const suggestionButtons = document.querySelectorAll('.get-suggestion-btn');
@@ -168,15 +188,17 @@
                     copyBtn.classList.add('hidden');
                     
                     try {
+                        // Make an asynchronous call to our Flask backend API
                         const response = await fetch('/generate-suggestion', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ skill, job_title: jobTitle })
                         });
                         
+                        // Parse the JSON response from the server
                         const data = await response.json();
                         
-                        // Display whatever the backend sends (suggestion or error)
+                        // Display either the suggestion or the error message from the backend
                         if (data.suggestion) {
                             modalSuggestion.textContent = data.suggestion;
                             copyBtn.classList.remove('hidden');
@@ -188,13 +210,13 @@
                     } catch (error) {
                         console.error('Fetch Error:', error);
                         modalSuggestion.textContent = 'Failed to communicate with the server. Please try again.';
-                        copyBtn.classList.add('hidden');
                     } finally {
                         modalLoader.classList.add('hidden');
                     }
                 });
             });
             
+            // Add event listener for the "Copy" button
             copyBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(modalSuggestion.textContent).then(() => {
                     copyBtn.textContent = 'Copied!';
@@ -202,6 +224,7 @@
                 }).catch(err => console.error('Failed to copy: ', err));
             });
             
+            // --- Auto-scroll to results ---
             const resultsSection = document.getElementById('results-section');
             if(resultsSection) {
                 resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
