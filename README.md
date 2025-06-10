@@ -3,7 +3,7 @@
 SmartApply - AI Resume Analyzer
 A full-stack web application designed to help job seekers optimize their resumes. SmartApply performs a skill-gap analysis by comparing a user's resume against a job description, calculates a match score, and leverages Google's Gemini AI to generate tailored bullet points for missing skills.
 
-Live Demo: [Link to your live Render application]
+Live Demo: https://smartapply-4hod.onrender.com/
 
 Features
 Resume Parsing: Extracts text directly from uploaded PDF resumes.
