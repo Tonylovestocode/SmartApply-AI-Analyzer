@@ -1,25 +1,33 @@
+# --- Required Imports ---
 import os
-import fitz  # PyMuPDF
-import spacy
+import fitz  # PyMuPDF library for reading text from PDFs
+import spacy # NLP library for advanced text analysis
 import json
-import requests
-from flask import Flask, request, render_template, jsonify
-from rapidfuzz import fuzz
+import requests # Library for making HTTP requests to external APIs (like Gemini)
+from flask import Flask, request, render_template, jsonify # Core Flask components
+from rapidfuzz import fuzz # Library for fast, fuzzy string matching
 
 # --- Basic Flask App Setup ---
+# Initialize the Flask application
 app = Flask(__name__)
+# Define a folder to store uploaded files temporarily
 UPLOAD_FOLDER = 'uploads'
+# Create the upload folder if it doesn't already exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # --- Load NLP Model ---
+# Try to load the pre-trained English language model from spaCy
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
+    # If the model isn't downloaded, print instructions and exit gracefully
     print("Spacy model 'en_core_web_sm' not found.")
     print("Please run: python -m spacy download en_core_web_sm")
     nlp = None 
 
-# --- Skill Analysis Logic (No changes) ---
+# --- Core Skill Analysis Logic ---
+
+# A predefined list of keywords to help spaCy identify potential skills.
 SKILL_KEYWORDS = [
     'python', 'java', 'c++', 'c#', 'javascript', 'html', 'css', 'react', 'angular', 'vue',
     'nodejs', 'flask', 'django', 'ruby', 'php', 'swift', 'kotlin', 'sql', 'mysql', 'postgresql',
@@ -33,6 +41,7 @@ SKILL_KEYWORDS = [
 ]
 
 def extract_text_from_pdf(filepath):
+    """Extracts all text from a given PDF file."""
     try:
         doc = fitz.open(filepath)
         text = "".join([page.get_text() for page in doc])
@@ -42,6 +51,7 @@ def extract_text_from_pdf(filepath):
         return ""
 
 def extract_skills_from_job_description(text):
+    """Analyzes the job description to identify required skills using spaCy."""
     if not nlp: return []
     doc = nlp(text.lower())
     found_skills = set()
@@ -54,6 +64,7 @@ def extract_skills_from_job_description(text):
     return list(found_skills)
 
 def analyze_resume_against_skills(resume_text, job_skills):
+    """Compares the resume text against the list of required skills."""
     resume_text_lower = resume_text.lower()
     matched_skills, missing_skills = [], []
     for skill in job_skills:
@@ -64,10 +75,12 @@ def analyze_resume_against_skills(resume_text, job_skills):
     return list(set(matched_skills)), list(set(missing_skills))
 
 def calculate_match_score(matched_skills, job_skills):
+    """Calculates a percentage score based on how many required skills were found."""
     if not job_skills: return 0
     return round((len(matched_skills) / len(job_skills)) * 100)
 
-# --- Main Flask Route ---
+# --- Flask Routes ---
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     analysis_results = None
@@ -96,7 +109,6 @@ def index():
     return render_template('index.html', results=analysis_results)
 
 
-# --- AI Suggestion Route with Local Simulation ---
 @app.route('/generate-suggestion', methods=['POST'])
 def generate_suggestion():
     try:
@@ -109,7 +121,7 @@ def generate_suggestion():
 
         api_key = '' # This remains empty for local testing.
         
-        # --- SIMULATION LOGIC ---
+        # --- LOCAL SIMULATION LOGIC ---
         if not api_key:
             print("--- RUNNING IN LOCAL SIMULATION MODE (NO API KEY) ---")
             simulated_text = f"Spearheaded a project utilizing {skill.title()} to streamline backend processes for the {job_title} role, improving system efficiency by 15%."
@@ -135,6 +147,6 @@ def generate_suggestion():
         print(f"Internal Server Error: {e}")
         return jsonify({'error': f'An internal server error occurred: {e}'}), 500
 
-
+# --- Start the Flask App ---
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
