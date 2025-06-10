@@ -3,3 +3,4 @@ spacy
 PyMuPDF
 rapidfuzz
 requests
+gunicorn
