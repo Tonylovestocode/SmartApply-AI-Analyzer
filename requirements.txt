@@ -1,0 +1,5 @@
+Flask
+spacy
+PyMuPDF
+rapidfuzz
+requests
